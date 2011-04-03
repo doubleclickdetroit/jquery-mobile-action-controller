@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=1">
+	<title>jQuery Mobile: Demos and Documentation</title>
+	<link rel="stylesheet"  href="styles/jquery.mobile-1.0a4.min.css" />
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+	<script type="text/javascript" src="javascripts/application-controller.js"></script>
+	<script type="text/javascript" src="javascripts/application-framework.js"></script>
+	<script type="text/javascript" src="javascripts/jquery.mobile-1.0a4.min.js"></script>
+</head>
+
+<body>
+
+	<div data-role="page" data-controller="home" data-action="foo" data-params="fname=john&lname=doe" data-theme="b">
+		<div data-role="content">
+			<h1>Homepage</h1>
+			<a data-role="button" href="#about">About Us</a>
+		</div>
+	</div>
+
+	<div data-role="page" data-controller="about" data-theme="b" id="about">
+		<div data-role="content">
+			<h1>About Us</h1>
+		</div>
+	</div>
+
+</body>
+</html>
