@@ -1,4 +1,4 @@
-(function() {
+(function(window, undefined) {
 	
 /*
  * Application Model
@@ -34,7 +34,7 @@ Controller = {
 		},
 		actionPerformed: function() {
 			alert('The button was clicked!');
-			console.log(this);
+			console.log('actionPerformed context:', this);
 		}
 	},
 
@@ -52,7 +52,9 @@ Controller = {
 };
 
 
-// Assign controller to global-scope
-window.myController = Controller;
+// Assign controller to framework
+$(window.document).bind('mobileinit', function() {
+	$.mobile.mctroller.init(Controller);
+});
 
-})();
+})(this);

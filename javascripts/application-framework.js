@@ -1,9 +1,9 @@
 /*
  * Application Framework
 */
-(function(window, $, ns, undefined) {
+(function(window, $, undefined) {
 
-var NS   = ns || {},
+var _ns   = {},
 	util = {
 		cookie: function(key, value, options) {
 			if (arguments.length > 1 && (value || value === null)) {
@@ -75,29 +75,50 @@ var NS   = ns || {},
 			return p;
 		}
 	},
+	namespace = {
+		extend: function(ns) {
+			if (!ns || !$.isPlainObject(ns))
+				return false;
+
+			_ns = $.extend({}, _ns, ns);
+			return true;
+		},
+		remove: function(prop) {
+			if (!prop || !_ns[prop])
+				return false;
+
+			delete _ns[prop];
+			return true;
+		}
+	},
 	app = {
+		init: function(ns) {
+			if (ns) namespace.extend(ns);
+
+			// initially invoke app-wide code
+			app.route({ controller: "common" });
+
+			// reset method to return true since it's already initialized.
+			this.init = function() { return true; };
+		},
 		route: function(req) {
 			// ensure req exists and is an object
 			if (!req || !$.isPlainObject(req)) return false;
 
 			// ensure the controller exists, otherwise default to a plain object.
-			var controller = NS[req.controller] || {},
+			var controller = _ns[req.controller] || {},
 
 				// find the action in the controller.
 				// default to the init method.
 				fn = controller[req.action || "init"];
-			
+
 			// set the context as the controller/namespace, not the window.
 			// pass an object containing all name/value pairs from the data-params attr.
 			// pass a reference of the page element.
 			if ($.isFunction(fn))
-				fn.call(controller || NS, util.params(req.params), req.element);
+				fn.call(controller || _ns, util.params(req.params), req.element);
 		}
 	};
-
-
-// initially invoke app-wide code
-app.route({ controller: "common" });
 
 
 // map controller and action on page init & page show/hide
@@ -123,4 +144,14 @@ $('body').live('pagecreate pageshow pagehide', function(evt) {
 	if (action) route({ action:action });
 });
 
-})(this, jQuery, myController);
+
+// add mctroller to $.mobile on "mobileinit" event
+$(window.document).bind('mobileinit', function() {
+	$.mobile.mctroller = {
+		init       : app.init,
+		util       : util,
+		controller : namespace
+	};
+});
+
+})(this, jQuery);
