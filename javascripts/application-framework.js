@@ -242,14 +242,14 @@ var _ns   = {},
 				 * @param  : string ( e.g. "johndoe@gmail.com" )
 				 * @return : self
 				*/
-				set: function(name, vale) {
+				set: function(name, val) {
 					var session  = this.session[name];
-					this.session = ($.isPlainObject(val)) ?
+					this.session[name] = ($.isPlainObject(val)) ?
 						$.extend(session || {}, val)      :
 						($.isArray(val))                  ?
 						$.merge(session || [], val)       : val;
 
-					save();
+					this.save();
 					return this;
 				},
 
@@ -264,7 +264,7 @@ var _ns   = {},
 					if (this.get(name))
 						delete this.session[name];
 
-					save();
+					this.save();
 					return this;
 				},
 
