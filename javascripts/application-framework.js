@@ -284,12 +284,13 @@ var _ns   = {},
 	};
 
 
-// map controller and action on page init & page show/hide
-$('body').live('pagecreate pageshow pagehide', function(evt) {
+// map controller and action on page init & page beforecreate/show/hide
+$('body').live('pagecreate pagebeforecreate pageshow pagehide', function(evt) {
 	var e = $(evt.target),
 
 		// if page[show/hide] event, forget the element's data-action.
-		hijack = evt.type == "pageshow" || evt.type == "pagehide",
+		hijack = evt.type == "pageshow" || evt.type == "pagehide" ||
+		         evt.type == "pagebeforecreate",
 
 		// do we need to hijack the action for page[show/creat]
 		// if not, get the action from the data-action attr.
