@@ -261,8 +261,13 @@ var _ns   = {},
 				 * @return : self
 				*/
 				clear: function(name) {
-					if (this.get(name))
-						delete this.session[name];
+					function remove(n) { delete this.session[n]; };
+
+					if (name && this.get(name))
+						remove.call(this, name);
+
+					else if (name === undefined)
+						for (n in this.session) remove.call(this, n);
 
 					this.save();
 					return this;
