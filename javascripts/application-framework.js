@@ -5,6 +5,16 @@
 
 var _ns   = {},
 	util = {
+
+		/*
+		 * Cookie Get/Set Mutator
+		 *
+		 * @access : private
+		 * @param  : string
+		 * @param  : string
+		 * @param  : object
+		 * @return : string
+		*/
 		cookie: function(key, value, options) {
 			if (arguments.length > 1 && (value || value === null)) {
 				options = $.extend({}, options);
@@ -37,6 +47,14 @@ var _ns   = {},
 			var result, decode = options.raw ? function (s) { return s; } : decodeURIComponent;
 			return (result = new RegExp('(?:^|; )' + encodeURIComponent(key) + '=([^;]*)').exec(document.cookie)) ? decode(result[1]) : null;
 		},
+
+		/*
+		 * Convert JSON object into a string
+		 * 
+		 * @access : private
+		 * @param  : object (JSON object)
+		 * @return : string
+		 */
 		stringJSON: function(obj) {
 			var arr = [],
 				isArray = obj instanceof Array;
@@ -61,6 +79,14 @@ var _ns   = {},
 			
 			return (isArray) ? "[" + arr.join(',') + "]" : "{" + arr.join(',') + "}";
 		},
+
+		/*
+		 * Build object literal from query string
+		 *
+		 * @access : private
+		 * @param  : string ("?fname=john&lname=doe")
+		 * @return : object ({ fname: "john", lname: "doe" })
+		*/
 		params: function(str) { // http://bit.ly/gWliW5
 			if (!str) return {};
 			var e,
@@ -92,6 +118,14 @@ var _ns   = {},
 		}
 	},
 	app = {
+
+		/*
+		 * Application initialization
+		 *
+		 * @access : public
+		 * @param  : object ({ home:{ init:function(){} }, about:{ init:function(){} } })
+		 * @return : void
+		*/
 		init: function(ns) {
 			if (ns) namespace.extend(ns);
 
@@ -101,6 +135,15 @@ var _ns   = {},
 			// reset method to return true since it's already initialized.
 			this.init = function() { return true; };
 		},
+
+		/*
+		 * Action Controller routing
+		 * Currently invoked on pagecreate/pageshow/pagehide event bindings
+		 *
+		 * @access : private
+		 * @param  : object ({ element:$(e), params:"fname=john&lname=doe", controller:"users", action:"add" })
+		 * @return : void
+		*/
 		route: function(req) {
 			// ensure req exists and is an object
 			if (!req || !$.isPlainObject(req)) return false;
@@ -117,7 +160,127 @@ var _ns   = {},
 			// pass a reference of the page element.
 			if ($.isFunction(fn))
 				fn.call(controller || _ns, util.params(req.params), req.element);
-		}
+		},
+
+		/*
+		 * Application Session
+		 * Ability to store data locally and pass it between pages.
+		 * 
+		 * @access  : public
+		 * @pattern : singleton
+		 * @return  : object
+		*/
+		session: (function() {
+
+			// take JSON object, stringify it and save it to cookie
+			function save(session) {
+				var json = util.stringJSON(session);
+				return json;
+			}
+
+			/*
+			 * Session constructor
+			 *
+			 * @access: public
+			 * @param : string (name of cookie)
+			 * @param : number (expiration of cookie)
+			*/
+			var instance = function(name, duration) {
+				name     = name || "mctroller_session";
+				duration = duration || 90;
+
+				// Determine if cookie is set, take JSON string
+				// make it an object and assign to var for use within other methods
+				this.session = $.parseJSON(util.cookie(name)) || {};
+
+				/*
+				 * Save the current state of the session data.
+				 * Alternatively, this is done automatically whenever the session data is altered using methods set() or clear().
+				 *
+				 * @access : privileged
+				 * @return : self
+				*/
+				this.save = function() {
+					util.cookie(name, save(this.session), {
+						path    : "/",
+						expires : duration
+					});
+				};
+
+				return this;
+			};
+
+			/*
+			 * Session public methods
+			 * Assigned to $.mctroller.session[methodName]
+			 *
+			 * @access: public
+			*/
+			instance.prototype = {
+
+				/* 
+				 * Access information saved between page loads in application.
+				 *
+				 * @access : public
+				 * @param  : string (name of attribute in JSON object) ( e.g. $.mctroller.session.get('hasAcceptedTermsAndConditions'); ).
+				 * @return : mixed (string || false)
+				*/
+				get: function(name) {
+					var val = this.session[name];
+					if (val) {
+						try {return eval(val)}
+						catch(e) {return val}
+					}
+					return false;
+				},
+
+				/*
+				 * Set and save information to be used between page loads in application.
+				 *
+				 * @access : public
+				 * @param  : string ( e.g. "userEmailAddress" )
+				 * @param  : string ( e.g. "johndoe@gmail.com" )
+				 * @return : self
+				*/
+				set: function(name, vale) {
+					var session  = this.session[name];
+					this.session = ($.isPlainObject(val)) ?
+						$.extend(session || {}, val)      :
+						($.isArray(val))                  ?
+						$.merge(session || [], val)       : val;
+
+					save();
+					return this;
+				},
+
+				/*
+				 * Clear information specifc to existing attribute
+				 *
+				 * @access : public
+				 * @param  : string ( e.g. "userEmailAddress" )
+				 * @return : self
+				*/
+				clear: function(name) {
+					if (this.get(name))
+						delete this.session[name];
+
+					save();
+					return this;
+				},
+
+				/*
+				 * View a dump of the session data for the application
+				 *
+				 * @access : public
+				 * @return : stringified JSON
+				*/
+				dump: function() {
+					return util.stringJSON(this.session);
+				}
+			};
+
+			return instance;
+		})()
 	};
 
 
@@ -145,13 +308,13 @@ $('body').live('pagecreate pageshow pagehide', function(evt) {
 });
 
 
-// add mctroller to $.mobile on "mobileinit" event
-$(window.document).bind('mobileinit', function() {
-	$.mobile.mctroller = {
+// add mctroller namespace to jQuery
+$.extend($, {
+	mctroller: {
 		init       : app.init,
-		util       : util,
+		session    : app.session,
 		controller : namespace
-	};
+	}
 });
 
 })(this, jQuery);

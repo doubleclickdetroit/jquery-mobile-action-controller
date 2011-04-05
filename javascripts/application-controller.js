@@ -52,9 +52,7 @@ Controller = {
 };
 
 
-// Assign controller to framework
-$(window.document).bind('mobileinit', function() {
-	$.mobile.mctroller.init(Controller);
-});
+// Assign controller to $.mctroller
+$.mctroller.init(Controller);
 
 })(this);
