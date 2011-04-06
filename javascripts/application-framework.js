@@ -191,7 +191,7 @@ var _ns   = {},
 
 				// Determine if cookie is set, take JSON string
 				// make it an object and assign to var for use within other methods
-				this.session = $.parseJSON(util.cookie(name)) || {};
+				var session = $.parseJSON(util.cookie(name)) || {};
 
 				/*
 				 * Save the current state of the session data.
@@ -201,10 +201,20 @@ var _ns   = {},
 				 * @return : self
 				*/
 				this.save = function() {
-					util.cookie(name, save(this.session), {
+					util.cookie(name, save(session), {
 						path    : "/",
 						expires : duration
 					});
+				};
+
+				/*
+				 * Session Accessor
+				 * 
+				 * @access : privileged
+				 * @return : object
+				*/
+				this.session = function() {
+					return session;
 				};
 
 				return this;
@@ -226,8 +236,8 @@ var _ns   = {},
 				 * @return : mixed (string || false)
 				*/
 				get: function(name) {
-					var val = this.session[name];
-					if (val) {
+					var val = this.session()[name];
+					if (val != undefined || val != null) {
 						try {return eval(val)}
 						catch(e) {return val}
 					}
@@ -243,8 +253,8 @@ var _ns   = {},
 				 * @return : self
 				*/
 				set: function(name, val) {
-					var session  = this.session[name];
-					this.session[name] = ($.isPlainObject(val)) ?
+					var session  = this.session()[name];
+					this.session()[name] = ($.isPlainObject(val)) ?
 						$.extend(session || {}, val)      :
 						($.isArray(val))                  ?
 						$.merge(session || [], val)       : val;
@@ -261,13 +271,13 @@ var _ns   = {},
 				 * @return : self
 				*/
 				clear: function(name) {
-					function remove(n) { delete this.session[n]; };
+					function remove(n) { delete this.session()[n]; };
 
 					if (name && this.get(name))
 						remove.call(this, name);
 
 					else if (name === undefined)
-						for (n in this.session) remove.call(this, n);
+						for (n in this.session()) remove.call(this, n);
 
 					this.save();
 					return this;
@@ -280,7 +290,7 @@ var _ns   = {},
 				 * @return : stringified JSON
 				*/
 				dump: function() {
-					return util.stringJSON(this.session);
+					return util.stringJSON(this.session());
 				}
 			};
 
