@@ -21,7 +21,7 @@ Controller = {
 		init: function(params, element) {
 			var self = this;
 			console.log('home.init was invoked!', params, element);
-			element.find('a.ui-btn').live('click', function(evt) {
+			$(params.btn).live('click', function(evt) {
 				self.actionPerformed();
 			});
 		},
