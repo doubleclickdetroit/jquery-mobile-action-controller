@@ -102,6 +102,13 @@ var _ns   = {},
 		}
 	},
 	namespace = {
+                /*
+                 * Extend namespace object
+                 *
+                 * @access : public
+                 * @param  : object ({ home: { init:function(){} } })
+                 * @return : boolean
+                */
 		extend: function(ns) {
 			if (!ns || !$.isPlainObject(ns))
 				return false;
@@ -109,6 +116,14 @@ var _ns   = {},
 			_ns = $.extend({}, _ns, ns);
 			return true;
 		},
+
+                /*
+                 * Remove namespace controller
+                 *
+                 * @access : public
+                 * @param  : string ('home')
+                 * @return : boolean
+                */
 		remove: function(prop) {
 			if (!prop || !_ns[prop])
 				return false;
