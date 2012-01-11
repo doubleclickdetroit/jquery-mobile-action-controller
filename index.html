@@ -5,24 +5,31 @@
 	<meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=1">
 	<title>jQuery Mobile: Demos and Documentation</title>
 	<link rel="stylesheet"  href="styles/jquery.mobile-1.0a4.min.css" />
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+	<script type="text/javascript" src="javascripts/jquery-1.7.1.min.js"></script>
 	<script type="text/javascript" src="javascripts/jquery.mobile.mctroller.js"></script>
 	<script type="text/javascript" src="javascripts/application-controller.js"></script>
-	<script type="text/javascript" src="javascripts/jquery.mobile-1.0a4.min.js"></script>
+	<script type="text/javascript" src="javascripts/jquery.mobile-1.0.min.js"></script>
 </head>
 
 <body>
 
-	<div data-role="page" data-controller="home" data-action="foo" data-params="fname=john&lname=doe&btn=#aboutus-btn" data-theme="b">
+	<div data-role="page" id="home"
+	     data-theme="b"
+	     data-controller="home"
+	     data-action="foo"
+	     data-params="fname=john&lname=doe&btn=#aboutus-btn">
 		<div data-role="content">
 			<h1>Homepage</h1>
 			<a data-role="button" id="aboutus-btn" href="#about">About Us</a>
 		</div>
 	</div>
 
-	<div data-role="page" data-controller="about" data-theme="b" id="about">
+	<div data-role="page" id="about"
+	     data-theme="b"
+	     data-controller="about">
 		<div data-role="content">
 			<h1>About Us</h1>
+			<a data-role="button" href="#home">Home</a>
 		</div>
 	</div>
 
