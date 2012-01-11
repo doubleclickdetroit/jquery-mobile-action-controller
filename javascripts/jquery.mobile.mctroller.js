@@ -102,26 +102,33 @@ var _ns   = {},
 
 // map controller and action on page init & page beforecreate/show/hide
 $('body').live('pagecreate pagebeforecreate pageshow pagehide', function(evt) {
-	var e = $(evt.target),
+	var $e  = $(evt.target),
+		id = $e.attr('id'),
 
 		// if page[show/hide] event, forget the element's data-action.
 		hijack = evt.type == "pageshow" || evt.type == "pagehide" ||
 		         evt.type == "pagebeforecreate",
 
-		// do we need to hijack the action for page[show/creat]
+		// if page[pagebeforecreate] event, page is init
+		isInit = evt.type == "pagebeforecreate",
+
+		// do we need to hijack the action for page[show/create]
 		// if not, get the action from the data-action attr.
-		action = hijack ? evt.type : e.jqmData('action');
+		action = hijack ? isInit ? "init" : evt.type : $e.jqmData('action');
 
 	function route(obj) {
 		app.route($.extend({
-			element    : e,
-			params     : e.jqmData('params'),
-			controller : e.jqmData('controller')
+			element    : $e,
+			params     : $e.jqmData('params'),
+			controller : $e.jqmData('controller')
 		}, obj || {}));
 	}
 
 	if (!hijack) route();
-	if (action) route({ action:action });
+	if (action) {
+		if (!isInit) route({ action:action });
+		if (hijack)  route({ action:id+"_"+action });
+	}
 });
 
 
